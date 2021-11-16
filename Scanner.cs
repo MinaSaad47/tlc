@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace TLC
 {
@@ -11,7 +12,14 @@ namespace TLC
     {
         public string lex;
         public TK token_type;
+
+        public Token(){}
         
+        public Token(string lexeme, TK tokenType)
+        {
+            lex = lexeme;
+            token_type = token_type;
+        }
     }
 
     public class Scanner
@@ -19,6 +27,7 @@ namespace TLC
         private List<Token> _tokens = new List<Token>();
         Dictionary<string, TK> ReservedWords = new Dictionary<string, TK>();
         Dictionary<string, TK> Operators = new Dictionary<string, TK>();
+        private string _error = String.Empty;
 
         public Scanner()
         {
@@ -59,6 +68,7 @@ namespace TLC
         public void StartScanning(string src)
         {
             // i: Outer loop to check on lexemes.
+            /*
             for (int i = 0; i < src.Length; i++)
             {
                 // j: Inner loop to check on each character in a single lexeme.
@@ -84,6 +94,7 @@ namespace TLC
                     // (3) Call FindTokenClass on the CurrentLexeme.
 
                     // (4) Update the outer loop pointer (i) to point on the next lexeme.
+                    
                 }
                 else if (char.IsDigit(CurrentChar))
                 {
@@ -98,6 +109,69 @@ namespace TLC
 
                 }
             }
+            */
+            string lexeme = string.Empty;
+
+            for (int i = 0; i < src.Length; i++)
+            {
+                char ch = src[i];
+
+                if (Char.IsLetterOrDigit(ch))
+                {
+                    lexeme += ch;
+                }
+                else
+                {
+                    if (!String.IsNullOrEmpty(lexeme))
+                    {
+                        FindTokenClass(lexeme);
+                        lexeme = String.Empty;
+                    }
+
+                    if (src[i] == '/' && src[i + 1] == '*')
+                    {
+                        int j;
+                        for (j = i; j < src.Length; j++)
+                        {
+                            lexeme += src[j]; 
+
+                            if (src[j] == '*' && src[j + 1] == '/')
+                            {
+                                lexeme += src[j + 1];
+                                break;
+                            }
+                        }
+                        FindTokenClass(lexeme);
+                        lexeme = String.Empty;
+                        i = j + 2;
+                    }
+                    else if (src[i] == '\"')
+                    {
+                        int j;
+                        for (j = i; j < src.Length; j++)
+                        {
+                            lexeme += src[j];
+                            if (src[j + 1] == '\"')
+                            {
+                                lexeme += src[j + 1];
+                                break;
+                            }
+                        }
+                        FindTokenClass(lexeme);
+                        lexeme = String.Empty;
+                        i = j + 1;
+                    }
+                    else if (Operators.ContainsKey(Char.ToString(ch)))
+                    {
+                        Token opToken = new Token();
+                        opToken.lex = Char.ToString(ch);
+                        opToken.token_type = Operators[Char.ToString(ch)];
+
+                        _tokens.Add(opToken);
+                    }
+                
+                }
+            }
         }
 
         void FindTokenClass(string lex)
@@ -106,7 +180,35 @@ namespace TLC
             Token token = new Token();
             token.lex = lex;
             //Is it a reserved word?
-
+            if (ReservedWords.ContainsKey(lex))
+            {
+                token.token_type = ReservedWords[lex];
+                _tokens.Add(token);
+            }
+            else if (isIdentifier(lex))
+            {
+                token.token_type = TK.Identifier;
+                _tokens.Add(token);
+            }
+            else if (isConstant(lex))
+            {
+                token.token_type = TK.Constant;
+                _tokens.Add(token);
+            }
+            else if (isComment(lex))
+            {
+                token.token_type = TK.Comment;
+                _tokens.Add(token);
+            }
+            else if (isString(lex))
+            {
+                token.token_type = TK.String;
+                _tokens.Add(token);
+            }
+            else
+            {
+                _error = lex;
+            }
             //Is it an identifier?
 
             //Is it a Constant?
@@ -115,24 +217,39 @@ namespace TLC
 
             //Is it an undefined?
 
+            
         }
 
         bool isIdentifier(string lex)
         {
-            bool isValid = true;
             // Check if the lex is an identifier or not.
+            Regex re = new Regex($"^{RE.Identifier}$", RegexOptions.Compiled);  
 
-            return isValid;
+            return re.IsMatch(lex);
         }
         bool isConstant(string lex)
         {
-            bool isValid = true;
             // Check if the lex is a constant (Number) or not.
+            Regex re = new Regex($"^{RE.Number}$", RegexOptions.Compiled);  
 
-            return isValid;
+            return re.IsMatch(lex);
+        }
+        bool isComment(string lex)
+        {
+            Regex re = new Regex($"^{RE.Comment}$", RegexOptions.Compiled);
+            Console.WriteLine(re.IsMatch(lex));
+            return re.IsMatch(lex);
+        }
+        bool isString(string lex)
+        {
+            Regex re = new Regex($"^{RE.String}$", RegexOptions.Compiled);
+
+            return re.IsMatch(lex);
         }
 
         public List<Token> Tokens { get => _tokens; }
+        public String Error { get => _error; }
 
     }
 }
+

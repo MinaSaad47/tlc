@@ -20,15 +20,26 @@ public class MainClass
 
         Console.WriteLine(src);
 
+        Console.Write(String.Concat(Enumerable.Repeat("=", 37)));
+        Console.Write("Tokens");
+        Console.WriteLine(String.Concat(Enumerable.Repeat("=", 37)));
+
         TLC.Scanner scanner = new TLC.Scanner();
         scanner.StartScanning(src);
 
         foreach(TLC.Token token in scanner.Tokens)
         {
-            Console.WriteLine($"{token.lex}\t{token.token_type}");
+            Console.WriteLine("{0,-50}|{1,-15}", token.lex, token.token_type.ToString());
+            Console.WriteLine(String.Concat(Enumerable.Repeat("-", 80)));
         }
-        
 
-        Console.WriteLine(String.Concat(Enumerable.Repeat("=", 80)));
+        if (!String.IsNullOrEmpty(scanner.Error))
+        {
+            Console.Write(String.Concat(Enumerable.Repeat("=", 37)));
+            Console.Write("Errors");
+            Console.WriteLine(String.Concat(Enumerable.Repeat("=", 37)));
+            Console.WriteLine(scanner.Error);
+        }
+
     }
 }
