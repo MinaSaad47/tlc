@@ -118,10 +118,8 @@ namespace TLC
             {
                 char ch = src[i];
 
-                if (isWhiteSpace(ch))
-                    continue;
 
-                if (Char.IsLetterOrDigit(ch))
+                if (Char.IsLetterOrDigit(ch) || ch == '.')
                 {
                     lexeme += ch;
                 }
@@ -132,6 +130,9 @@ namespace TLC
                         FindTokenClass(lexeme);
                         lexeme = String.Empty;
                     }
+
+                    if (isWhiteSpace(ch))
+                        continue;
 
                     if (src[i] == '/' && src[i + 1] == '*')
                     {
@@ -169,10 +170,13 @@ namespace TLC
                     else 
                     {
                         Token opToken = new Token();
-                        if (src[i] == ':' && src[i + 1] == '=')
+                        if ((src[i] == ':' && src[i + 1] == '=') ||
+                            (src[i] == '&' && src[i + 1] == '&') ||
+                            (src[i] == '|' && src[i + 1] == '|') ||
+                            (src[i] == '<' && src[i + 1] == '>'))
                         {
-                            opToken.lex = ":=";
-                            opToken.token_type = TK.AssignOp;
+                            opToken.lex = $"{src[i]}{src[i + 1]}";
+                            opToken.token_type = Operators[opToken.lex];
                             i++;
                         }
                         else if (Operators.ContainsKey(Char.ToString(ch)))
@@ -183,7 +187,7 @@ namespace TLC
                         }
                         else 
                         {
-                            _error += $"\nInvalid Lexem:\n{ch}\n";
+                            _error += $"Invalid Lexem:\n{ch}\n\n";
                             continue;
                         }
 
@@ -192,6 +196,9 @@ namespace TLC
                 
                 }
             }
+            
+            if (!String.IsNullOrEmpty(lexeme))
+                FindTokenClass(lexeme);
         }
 
         void FindTokenClass(string lex)
@@ -227,7 +234,7 @@ namespace TLC
             }
             else
             {
-                _error += $"\nInvalid Lexem:\n{lex}\n";
+                _error += $"Invalid Lexem:\n{lex}\n\n";
             }
             //Is it an identifier?
 

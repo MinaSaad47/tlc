@@ -81,6 +81,9 @@ class MainClass
             }
 
             tablevTokens.Table = dt;
+            if (!winErr.Text.IsEmpty) {
+                winErr.Clear();
+            }
             winErr.Text = scanner.Error;
         };
 
