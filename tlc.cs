@@ -4,8 +4,9 @@ namespace TLC
     {
         Int, Float, String, Identifier, L_Paren, R_Paren, L_Brace, R_Brace, 
         L_Brack, R_Brack, Coma, Colon, SemiColon, Comment, Repeat, AssignOp,
-        Equal, PlusOp, MinusOp, Untill, LessThanOp, GreaterThanOp, Return, 
-        Write, Read, DivideOp, MultiOp, Endl, Constant, If, Else, ElseIf, Then
+        EqualOp, NotEqualOp, PlusOp, MinusOp, Untill, LessThanOp, GreaterThanOp,
+        Return, Write, Read, DivideOp, MultiOp, Endl, Constant, If, Else,
+        ElseIf, Then
     }
 
     public static class RE

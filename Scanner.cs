@@ -57,11 +57,12 @@ namespace TLC
             Operators.Add("/", TK.DivideOp);
             Operators.Add("*", TK.MultiOp);
             Operators.Add(":=", TK.AssignOp);
-            Operators.Add("=", TK.Equal);
+            Operators.Add("=", TK.EqualOp);
             Operators.Add("+", TK.PlusOp);
             Operators.Add("-", TK.MinusOp);
             Operators.Add("<", TK.LessThanOp);
             Operators.Add(">", TK.GreaterThanOp);
+            Operators.Add("<>", TK.NotEqualOp);
 
         }
 
@@ -110,11 +111,15 @@ namespace TLC
                 }
             }
             */
+
             string lexeme = string.Empty;
 
             for (int i = 0; i < src.Length; i++)
             {
                 char ch = src[i];
+
+                if (isWhiteSpace(ch))
+                    continue;
 
                 if (Char.IsLetterOrDigit(ch))
                 {
@@ -161,11 +166,26 @@ namespace TLC
                         lexeme = String.Empty;
                         i = j + 1;
                     }
-                    else if (Operators.ContainsKey(Char.ToString(ch)))
+                    else 
                     {
                         Token opToken = new Token();
-                        opToken.lex = Char.ToString(ch);
-                        opToken.token_type = Operators[Char.ToString(ch)];
+                        if (src[i] == ':' && src[i + 1] == '=')
+                        {
+                            opToken.lex = ":=";
+                            opToken.token_type = TK.AssignOp;
+                            i++;
+                        }
+                        else if (Operators.ContainsKey(Char.ToString(ch)))
+                        {
+                            opToken.lex = Char.ToString(ch);
+                            opToken.token_type = Operators[Char.ToString(ch)];
+
+                        }
+                        else 
+                        {
+                            _error += $"\nInvalid Lexem:\n{ch}\n";
+                            continue;
+                        }
 
                         _tokens.Add(opToken);
                     }
@@ -207,7 +227,7 @@ namespace TLC
             }
             else
             {
-                _error = lex;
+                _error += $"\nInvalid Lexem:\n{lex}\n";
             }
             //Is it an identifier?
 
@@ -237,7 +257,6 @@ namespace TLC
         bool isComment(string lex)
         {
             Regex re = new Regex($"^{RE.Comment}$", RegexOptions.Compiled);
-            Console.WriteLine(re.IsMatch(lex));
             return re.IsMatch(lex);
         }
         bool isString(string lex)
@@ -245,6 +264,11 @@ namespace TLC
             Regex re = new Regex($"^{RE.String}$", RegexOptions.Compiled);
 
             return re.IsMatch(lex);
+        }
+
+        bool isWhiteSpace(char ch)
+        {
+            return (ch == ' ' || ch == '\r' || ch == '\n');
         }
 
         public List<Token> Tokens { get => _tokens; }
