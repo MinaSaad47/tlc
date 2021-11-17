@@ -1,0 +1,12 @@
+int main()
+{
+int x :=3;
+int Y :=4;
+if  X != Y then 
+            write X;
+else
+            write Y;
+/* This is a comment
+end
+return 0;
+}
