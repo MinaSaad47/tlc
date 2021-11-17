@@ -1,45 +1,84 @@
+using System;
+using Terminal.Gui;
+using NStack;
+using System.Data;
 using System.IO;
 
-public class MainClass
+
+class MainClass
 {
     public static void Main(string[] args)
     {
-        if (args.Length < 1)
+
+        Application.Init();
+        var top = Application.Top;
+
+        var winSrc = new Window("Tiny Source") {
+            X = 1,
+            Y = 1,
+            Width = Dim.Percent(50),
+            Height = Dim.Fill(),
+        };
+
+        var winTks = new Window("Tokens") {
+            X = Pos.Right(winSrc),
+            Y = 1,
+            Width = Dim.Fill(),
+            Height = Dim.Percent(75),
+        };
+
+        var winErr = new Window("Errors") {
+            X = Pos.Right(winSrc),
+            Y = Pos.Bottom(winTks),
+            Width = Dim.Fill(),
+            Height = Dim.Fill(),
+            ColorScheme = Colors.Error
+        };
+
+        var tvSrc = new TextView() {
+            X = 1,
+            Y = 1,
+            Width = Dim.Fill(),
+            Height = Dim.Fill() - 1
+        };
+
+        if (args.Length > 0)
         {
-            Console.Error.WriteLine("Expected one argument");
-            Console.Error.WriteLine($"Usage: dotnet run -- <src-file>");
+            tvSrc.Text = File.ReadAllText(args[0]);
+        }
+
+        var tablevTokens = new TableView() {
+            X = 1,
+            Y = 1,
+            Width = Dim.Fill(),
+            Height = Dim.Fill()
+        };
+
+        var btnCompile = new Button("Generate Tokens", true) {
+            X = Pos.Center(),
+            Y = Pos.Bottom(tvSrc),
+        };
+        btnCompile.Clicked += () => {
+            string src = tvSrc.Text.ToString();
+            TLC.Scanner scanner = new TLC.Scanner();
+            scanner.StartScanning(src);
             
-            Environment.Exit(-1);
-        }
-        
-        string src = File.ReadAllText(args[0]);
+            var dt = new DataTable();
+            dt.Columns.Add("lexem");
+            dt.Columns.Add("token");
 
-        Console.Write(String.Concat(Enumerable.Repeat("=", 33)));
-        Console.Write("Tiny SRC");
-        Console.WriteLine(String.Concat(Enumerable.Repeat("=", 33)));
+            foreach (var token in scanner.Tokens)
+            {
+                dt.Rows.Add(token.lex, token.token_type.ToString());
+            }
 
-        Console.WriteLine(src);
+            tablevTokens.Table = dt;
+            winErr.Text = scanner.Error;
+        };
 
-        Console.Write(String.Concat(Enumerable.Repeat("=", 37)));
-        Console.Write("Tokens");
-        Console.WriteLine(String.Concat(Enumerable.Repeat("=", 37)));
-
-        TLC.Scanner scanner = new TLC.Scanner();
-        scanner.StartScanning(src);
-
-        foreach(TLC.Token token in scanner.Tokens)
-        {
-            Console.WriteLine("{0,-50}|{1,-15}", token.lex, token.token_type.ToString());
-            Console.WriteLine(String.Concat(Enumerable.Repeat("-", 80)));
-        }
-
-        if (!String.IsNullOrEmpty(scanner.Error))
-        {
-            Console.Write(String.Concat(Enumerable.Repeat("=", 37)));
-            Console.Write("Errors");
-            Console.WriteLine(String.Concat(Enumerable.Repeat("=", 37)));
-            Console.WriteLine(scanner.Error);
-        }
-
+        winSrc.Add(tvSrc, btnCompile);
+        winTks.Add(tablevTokens);
+        top.Add(winSrc, winTks, winErr);
+        Application.Run();
     }
 }

@@ -237,7 +237,6 @@ namespace TLC
         bool isComment(string lex)
         {
             Regex re = new Regex($"^{RE.Comment}$", RegexOptions.Compiled);
-            Console.WriteLine(re.IsMatch(lex));
             return re.IsMatch(lex);
         }
         bool isString(string lex)
