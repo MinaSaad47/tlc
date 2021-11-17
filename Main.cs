@@ -14,11 +14,19 @@ class MainClass
         var top = Application.Top;
 
         var winSrc = new Window("Tiny Source") {
-            X = 1,
+            X = 0,
             Y = 1,
             Width = Dim.Percent(50),
             Height = Dim.Fill(),
         };
+
+        var menu = new MenuBar (new MenuBarItem [] {
+            new MenuBarItem ("_File", new MenuItem [] {
+                new MenuItem ("_Quit", "", () => { 
+                    Application.RequestStop ();
+                })
+            }),
+        });
 
         var winTks = new Window("Tokens") {
             X = Pos.Right(winSrc),
@@ -78,7 +86,7 @@ class MainClass
 
         winSrc.Add(tvSrc, btnCompile);
         winTks.Add(tablevTokens);
-        top.Add(winSrc, winTks, winErr);
+        top.Add(menu, winSrc, winTks, winErr);
         Application.Run();
     }
 }
