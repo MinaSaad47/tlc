@@ -190,7 +190,7 @@ namespace TLC
                         }
                         else 
                         {
-                            _error += $"Invalid Lexem:\n{ch}\n\n";
+                            _error += $"Invalid Lexeme:\n{ch}\n\n";
                             continue;
                         }
 
@@ -237,7 +237,7 @@ namespace TLC
             }
             else
             {
-                _error += $"Invalid Lexem:\n{lex}\n\n";
+                _error += $"Invalid Lexeme:\n{lex}\n\n";
             }
             //Is it an identifier?
 
