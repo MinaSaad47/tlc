@@ -1,2 +1,4 @@
 obj/
 bin/
+tests/example3.tiny
+.gitignore

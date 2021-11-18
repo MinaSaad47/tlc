@@ -6,7 +6,7 @@ namespace TLC
         L_Brack, R_Brack, Coma, Colon, SemiColon, Comment, Repeat, AssignOp,
         EqualOp, NotEqualOp, PlusOp, MinusOp, Untill, LessThanOp, GreaterThanOp,
         Return, Write, Read, DivideOp, MultiOp, Endl, Constant, If, Else,
-        ElseIf, Then
+        ElseIf, End, Then, AndOp, OrOp
     }
 
     public static class RE

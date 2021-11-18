@@ -42,8 +42,9 @@ namespace TLC
             ReservedWords.Add("endl", TK.Endl);
             ReservedWords.Add("if", TK.If);
             ReservedWords.Add("else", TK.Else);
-            ReservedWords.Add("elseIf", TK.ElseIf);
+            ReservedWords.Add("elseif", TK.ElseIf);
             ReservedWords.Add("then", TK.Then);
+            ReservedWords.Add("end", TK.End);
 
             Operators.Add(":", TK.Colon);
             Operators.Add(";", TK.SemiColon);
@@ -63,6 +64,8 @@ namespace TLC
             Operators.Add("<", TK.LessThanOp);
             Operators.Add(">", TK.GreaterThanOp);
             Operators.Add("<>", TK.NotEqualOp);
+            Operators.Add("&&", TK.AndOp);
+            Operators.Add("||", TK.OrOp);
 
         }
 
@@ -275,7 +278,7 @@ namespace TLC
 
         bool isWhiteSpace(char ch)
         {
-            return (ch == ' ' || ch == '\r' || ch == '\n');
+            return (ch == ' ' || ch == '\t' || ch == '\r' || ch == '\n');
         }
 
         public List<Token> Tokens { get => _tokens; }
