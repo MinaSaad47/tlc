@@ -13,7 +13,7 @@ namespace TLC
     {
         public const string Number = "[0-9]+(.[0-9]+)?";
         public const string Identifier = "[a-zA-Z][0-9a-zA-Z]*";
-        public const string String = @"""((\\[^\n]|[^""\n])*)""";
-        public const string Comment = @"/\*(.*?)\*/";
+        public const string String = @"""[^\n]*"""; // single-line string literal.
+        public const string Comment = @"/\*(.*?)\*/"; // multi-line comment.
     }
 }

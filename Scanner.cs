@@ -137,10 +137,10 @@ namespace TLC
                     if (isWhiteSpace(ch))
                         continue;
 
-                    if (src[i] == '/' && src[i + 1] == '*')
+                    if (src[i] == '/' && src[i + 1] == '*') // handling comments
                     {
                         int j;
-                        for (j = i; j < src.Length; j++)
+                        for (j = i; j < src.Length - 1; j++)
                         {
                             lexeme += src[j]; 
 
@@ -157,7 +157,7 @@ namespace TLC
                     else if (src[i] == '\"')
                     {
                         int j;
-                        for (j = i; j < src.Length; j++)
+                        for (j = i; j < src.Length - 1; j++) // handling single-line string literals
                         {
                             lexeme += src[j];
                             if (src[j + 1] == '\"')
