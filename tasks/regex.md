@@ -6,7 +6,7 @@
 | Number                | <code>[0-9]+(\.[0-9]+)?</code>                                                                                                                    |
 | String                | <code>".*"</code>                                                                                                                                 |
 | Reserved_Keywords     | <code>int&#124;float&#124;string&#124;read&#124;write&#124;repeat&#124;until&#124;if&#124;elseif&#124;else&#124;then&#124;return&#124;endl</code> |
-| Comment               | <code>\/\*.*\*\/</code>                                                                                                                           |
+| Comment               | <code>\\/\\\*.\*\\*\\/</code>                                                                                                                     |
 | Identifier            | <code>[a-zA-Z][0-9a-zA-Z]*</code>                                                                                                                 |
 | Function_Call         | <code>Idetifier\\(((Identifier,)*Identifier)?\\)</code>                                                                                           |
 | Term                  | <code>(Number&#124;Identifier&#124;Function_Call)</code>                                                                                          |
