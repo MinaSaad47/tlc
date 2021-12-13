@@ -70,7 +70,7 @@ class MainClass
             string src = tvSrc.Text.ToString();
             TLC.Scanner scanner = new TLC.Scanner();
             scanner.StartScanning(src);
-            
+
             var dt = new DataTable();
             dt.Columns.Add("lexem");
             dt.Columns.Add("token");
