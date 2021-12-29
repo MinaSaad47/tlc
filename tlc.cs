@@ -16,4 +16,10 @@ namespace TLC
         public const string String = @"""[^\n]*"""; // single-line string literal.
         public const string Comment = @"\/\*.*\*\/"; // multi-line comment.
     }
+
+	public static class Errors
+	{
+		public static List<string> Error_List = new List<string>();
+	}
+
 }

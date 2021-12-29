@@ -1,6 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Terminal.Gui;
-using Terminal.Gui;
+using Terminal.Gui.Trees;
 using NStack;
 using System.Data;
 using System.IO;
@@ -24,8 +25,9 @@ class MainClass
 		var menu = new MenuBar (new MenuBarItem [] {
 			new MenuBarItem ("_File", new MenuItem [] {
 				new MenuItem ("_Quit", "", () => { 
-					Application.RequestStop ();
-				})
+					top.Running = false;
+					Application.Shutdown();
+				}, null, null, Key.Q | Key.CtrlMask)
 			}),
 		});
 
@@ -107,6 +109,11 @@ class MainClass
 				dt.Rows.Add(token.lex, token.token_type.ToString());
 			}
 
+			TLC.Parser parser = new TLC.Parser();
+			parser.StartParsing(scanner.Tokens);
+			TreeNode tree = TLC.Parser.PrintParseTree(parser.root);
+			
+			treeSyntax.AddObject(tree);
 			tablevTokens.Table = dt;
 			if (!winErr.Text.IsEmpty) {
 				winErr.Clear();
@@ -120,6 +127,13 @@ class MainClass
 		tabRes.AddTab(tabTK, true);
 		tabRes.AddTab(tabPT, false);
 		top.Add(menu, winSrc, tabRes, winErr);
-		Application.Run();
+		try
+		{
+			Application.Run(top);
+		}
+		catch (Exception ex)
+		{
+			Application.Shutdown();
+		}
 	}
 }

@@ -14,7 +14,7 @@ namespace TLC
         public TK token_type;
 
         public Token(){}
-        
+
         public Token(string lexeme, TK tokenType)
         {
             lex = lexeme;
