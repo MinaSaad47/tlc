@@ -37,8 +37,6 @@ namespace TLC
 			Node program = new Node("Program");
 			program.Children.Add(FuncStmt());
 			// program.Children.Add(MainFunc());
-			// program.Children.Add(match(TK.Dot));
-			// MessageBox.Show("Success");
 			return program;
 		}
 
@@ -57,8 +55,44 @@ namespace TLC
 			node.Children.Add(DataType());
 			node.Children.Add(FuncName());
 			node.Children.Add(match(TK.L_Paren));
-			// node.Children.Add(ParamList());
+			node.Children.Add(ParamList());
 			node.Children.Add(match(TK.R_Paren));
+			return node;
+		}
+
+		Node ParamList()
+		{
+			Node node = new Node("ParamList");
+			if (TokenStream[InputPointer].token_type == TK.Coma)
+			{
+				node.Children.Add(ParamListDash());
+			}
+			else
+			{
+				node.Children.Add(Param());
+				node.Children.Add(ParamListDash());
+			}
+			return node;
+		}
+
+		Node ParamListDash()
+		{
+			Node node = new Node("ParamListDash");
+			if (TokenStream[InputPointer].token_type == TK.Coma)
+			{
+				node.Children.Add(match(TK.Coma));
+				node.Children.Add(Param());
+				node.Children.Add(ParamListDash());
+				return node;
+			}
+			return null;
+		}
+
+		Node Param()
+		{
+			Node node = new Node("Param");
+			node.Children.Add(DataType());
+			node.Children.Add(match(TK.Identifier));
 			return node;
 		}
 
@@ -72,6 +106,148 @@ namespace TLC
 		Node FuncBody()
 		{
 			Node node = new Node("FuncBody");
+			node.Children.Add(match(TK.L_Brace));
+			node.Children.Add(Statements());
+			node.Children.Add(RetStmt());
+			node.Children.Add(match(TK.R_Brace));
+			return node;
+		}
+
+		Node Statements()
+		{
+			Node node = new Node("Statements");
+			node.Children.Add(Statement());
+			node.Children.Add(StatementsDash());
+			return node;
+		}
+
+		Node StatementsDash()
+		{
+			Node node = new Node("StatementsDash");
+			switch (TokenStream[InputPointer].token_type)
+			{
+			case TK.Identifier:
+			case TK.Int:
+			case TK.Float:
+			case TK.String:
+			case TK.Write:
+			case TK.Read:
+			case TK.Return:
+			case TK.If:
+			case TK.Repeat:
+			case TK.Comment:
+				node.Children.Add(Statement());
+				node.Children.Add(StatementsDash());
+				break;
+			default:
+				return null;
+			}
+
+			return node;
+		}
+
+		Node Statement()
+		{
+			Node node = new Node("Statement");
+
+			switch (TokenStream[InputPointer].token_type)
+			{
+			case TK.Identifier:
+				if (TokenStream[InputPointer + 1].token_type == TK.L_Paren)
+				{
+					node.Children.Add(FuncCall());
+				}
+				else
+				{
+					node.Children.Add(AssignStmt());
+				}
+				break;
+			case TK.Int:
+			case TK.Float:
+			case TK.String:
+				node.Children.Add(DeclStmt());
+				break;
+			case TK.Write:
+				node.Children.Add(WriteStmt());
+				break;
+			case TK.Read:
+				node.Children.Add(ReadStmt());
+				break;
+			case TK.Return:
+				node.Children.Add(RetStmt());
+				break;
+			case TK.If:
+				node.Children.Add(IfElseStmt());
+				break;
+			case TK.Repeat:
+				node.Children.Add(RepeatStmt());
+				break;
+			case TK.Comment:
+				node.Children.Add(CommentStmt());
+				break;
+			default:
+				return null;
+			}
+			return node;
+		}
+
+		Node FuncCall()
+		{
+			Node node = new Node("FuncCall");
+			node.Children.Add(FuncName());
+			node.Children.Add(match(TK.L_Paren));
+			node.Children.Add(ArgList());
+			node.Children.Add(match(TK.R_Paren));
+			node.Children.Add(match(TK.SemiColon));
+			return node;
+		}
+
+		Node ArgList()
+		{
+			Node node = new Node("ArgList");
+			if (TokenStream[InputPointer].token_type == TK.Identifier)
+			{
+				node.Children.Add(Arg());
+			}
+			node.Children.Add(ArgListDash());
+			return node;
+		}
+
+		Node ArgListDash()
+		{
+			Node node = new Node("ArgListDash");
+			if (TokenStream[InputPointer].token_type == TK.Coma)
+			{
+				node.Children.Add(match(TK.Coma));
+				node.Children.Add(Arg());
+				node.Children.Add(ArgListDash());
+				return node;
+			}
+
+			return null;
+		}
+
+		Node Arg()
+		{
+			Node node = new Node("Arg");
+			node.Children.Add(match(TK.Identifier));
+			return node;
+		}
+
+		Node AssignStmt()
+		{
+			Node node = new Node();
+			node.Children.Add(LValue());
+			node.Children.Add(match(TK.AssignOp));
+			node.Children.Add(RValue());
+			node.Children.Add(match(TK.SemiColon));
+			return node;
+		}
+
+		Node LValue()
+		{
+			Node node = new Node("LValue");
+			node.Children.Add(match(TK.Identifier));
 			return node;
 		}
 
@@ -119,6 +295,7 @@ namespace TLC
 		// }
 
 		// Implement your logic here
+
 		Node RValue()
 		{
 			Node node = new Node("RValue");
@@ -356,6 +533,47 @@ namespace TLC
 			node.Children.Add(match(TK.End));
 			return node ;
 		}
+
+		Node ElseBlock()
+		{
+			Node node = new Node("ElseBlock");
+			switch (TokenStream[InputPointer].token_type)
+			{
+			case TK.ElseIf:
+				node.Children.Add(ElIfBlock());
+				node.Children.Add(ElseBlock());
+				break;
+			case TK.Else:
+				node.Children.Add(match(TK.Else));
+				node.Children.Add(Statements());
+			default:
+				return null;
+				break;
+			}
+			return node;
+		}
+
+		Node ElIfBlock()
+		{
+			Node node = new Node("ElIfBlock");
+			node.Children.Add(match(TK.ElseIf))
+			node.Children.Add(CondStmt());
+			node.Children.Add(match(TK.Then))
+			node.Children.Add(Statements());
+			return node;
+		}
+
+		Node MainFunc()
+		{
+			Node node = new Node("MainFunc");
+			node.Children.Add(DataType());
+			node.Children.Add(match(TK.Main));
+			node.Children.Add(match(TK.L_Paren));
+			node.Children.Add(match(TK.R_Paren));
+			node.Children.Add(FuncBody());
+			return node;
+		}
+
 		public Node match(TK ExpectedToken)
 		{
 
