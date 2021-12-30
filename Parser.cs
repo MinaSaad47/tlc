@@ -119,7 +119,243 @@ namespace TLC
 		// }
 
 		// Implement your logic here
-
+		Node RValue()
+		{
+			Node node = new Node("RValue");
+			if(TokenStream[InputPointer].token_type==TK.String)
+			{
+				node.Children.Add(match(TK.String));
+			}
+			else
+			{
+				node.Children.Add(Expression());
+			}
+			return node;
+		}
+		Node Expression()
+		{
+			Node node = new Node("Expression");
+			node.Children.Add(Term());
+			node.Children.Add(ExpressionDash());
+			return node ;
+		}
+		Node ExpressionDash()
+		{
+			Node node = new Node("ExpressionDash");
+			if(TokenStream[InputPointer].token_type==TK.PlusOp || TokenStream[InputPointer].token_type==TK.MinusOp)
+			{
+				node.Children.Add(AddOp());
+				node.Children.Add(Term());
+				node.Children.Add(ExpressionDash());
+			}
+			else
+			{
+				return null ;
+			}
+			return node ;
+		}
+		Node AddOp()
+		{
+			Node node = new Node("AddOp");
+			if(TokenStream[InputPointer].token_type==TK.PlusOp)
+			{
+				node.Children.Add(match(TK.PlusOp));
+			}
+			else
+			{
+				node.Children.Add(match(TK.MinusOp));
+			}
+			return node ;
+		}
+		Node Term()
+		{
+			Node node = new Node("Term");
+			node.Children.Add(Factor());
+			node.Children.Add(TermDash());
+			return node ;
+		}
+		Node TermDash()
+		{
+			Node node = new Node("TermDash");
+			if(TokenStream[InputPointer].token_type==TK.MultiOp || TokenStream[InputPointer].token_type==TK.DivideOp)
+			{
+				node.Children.Add(MulOp());
+				node.Children.Add(Factor());
+				node.Children.Add(TermDash());
+			}
+			else
+			{
+				return null ;
+			}
+			return node ;
+		}
+		Node MulOp()
+		{
+			Node node = new Node("MulOp");
+			if(TokenStream[InputPointer].token_type==TK.MultiOp)
+			{
+				node.Children.Add(match(TK.MultiOp));
+			}
+			else
+			{
+				node.Children.Add(match(TK.DivideOp));
+			}
+			return node ;
+		}
+		Node Factor()
+		{
+			Node node = new Node("Factor");
+				if(TokenStream[InputPointer].token_type==TK.Constant)
+				{
+					node.Children.Add(match(TK.Constant));
+				}
+				else if (TokenStream[InputPointer].token_type==TK.Identifier)
+				{
+					node.Children.Add(match(TK.Identifier));
+				}
+				else
+				{
+					node.Children.Add(FuncCall());
+				}
+				return node ;
+		}
+		Node DeclStmt()
+		{
+			Node node = new Node("DeclStmt");
+			node.Children.Add(DataType());
+			node.Children.Add(IdentList());
+			node.Children.Add(match(TK.SemiColon));
+			return node ;
+		}
+		Node IdentList()
+		{
+			Node node = new Node("IdentList");
+			node.Children.Add(match(TK.Identifier));
+			node.Children.Add(IdentListDash());
+			return node ;
+		}
+		Node IdentListDash()
+		{
+			Node node = new Node("IdentListDash");
+			if(TokenStream[InputPointer].token_type == TK.Coma)
+			{
+				node.Children.Add(match(TK.Coma));
+				node.Children.Add(match(TK.Identifier));
+				node.Children.Add(IdentListDash());
+			}
+			else
+			{
+				return null;
+			}
+			return node ;
+		}
+		Node WriteStmt()
+		{
+			Node node = new Node("WriteStmt");
+			node.Children.Add(match(TK.Write));
+			node.Children.Add(RValue());
+			node.Children.Add(match(TK.SemiColon));
+			return node ;
+		}
+		Node ReadStmt()
+		{
+			Node node = new Node("ReadStmt");
+			node.Children.Add(match(TK.Read));
+			node.Children.Add(LValue());
+			node.Children.Add(match(TK.SemiColon));
+			return node ;
+		}
+		Node RetStmt()
+		{
+			Node node = new Node("RetStmt");
+			node.Children.Add(match(TK.Return));
+			node.Children.Add(RValue());
+			node.Children.Add(match(TK.SemiColon));
+			return node;
+		}
+		Node RepeatStmt()
+		{
+			Node node = new Node("RepeatStmt");
+			node.Children.Add(match(TK.Repeat));
+			node.Children.Add(Statements());
+			node.Children.Add(match(TK.Untill));
+			node.Children.Add(CondStmt());
+			return node;
+		}
+		Node CondStmt()
+		{
+			Node node = new Node("CondStmt");
+			node.Children.Add(Condition());
+			node.Children.Add(CondStmtDash());
+			return node;
+		}
+		Node CondStmtDash()
+		{
+			Node node = new Node("CondStmtDash");
+			if(TokenStream[InputPointer].token_type==TK.AndOp || TokenStream[InputPointer].token_type==TK.OrOp )
+			{
+				node.Children.Add(BoolList());
+				node.Children.Add(Condition());
+				node.Children.Add(CondStmtDash());
+			}
+			else
+			{
+				return null ;
+			}
+			return node;
+		}
+		Node Condition()
+		{
+			Node node = new Node("Condition");
+			node.Children.Add(Expression());
+			node.Children.Add(CondOp());
+			node.Children.Add(Expression());
+			return node;
+		}
+		Node CondOp()
+		{
+			Node node = new Node("CondOp");
+			switch(TokenStream[InputPointer].token_type)
+			{
+				case TK.LessThanOp :
+					node.Children.Add(match(TK.LessThanOp));
+					break;
+				case TK.GreaterThanOp :
+					node.Children.Add(match(TK.GreaterThanOp));
+					break;
+				case TK.EqualOp :
+					node.Children.Add(match(TK.EqualOp));
+					break;
+				case TK.NotEqualOp :
+					node.Children.Add(match(TK.NotEqualOp));
+					break;
+			}
+			return node;
+		}
+		Node BoolList()
+		{
+			Node node = new Node("BoolList");
+			if(TokenStream[InputPointer].token_type==TK.AndOp)
+			{
+				node.Children.Add(match(TK.AndOp));
+			}
+			else
+			{
+				node.Children.Add(match(TK.OrOp));
+			}
+			return node ;
+		}
+		Node IfElseStmt()
+		{
+			Node node = new Node("IfElseStmt");
+			node.Children.Add(match(TK.If));
+			node.Children.Add(CondStmt());
+			node.Children.Add(match(TK.Then));
+			node.Children.Add(Statements());
+			node.Children.Add(ElseBlock());
+			node.Children.Add(match(TK.End));
+			return node ;
+		}
 		public Node match(TK ExpectedToken)
 		{
 
