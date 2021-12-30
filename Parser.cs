@@ -93,6 +93,7 @@ namespace TLC
 			Node node = new Node("Param");
 			node.Children.Add(DataType());
 			node.Children.Add(match(TK.Identifier));
+			return node;
 		}
 
 		Node FuncName()
