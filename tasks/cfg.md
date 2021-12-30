@@ -38,7 +38,7 @@ CondStmt'				-> BoolList Condition CondStmt' | e
 Condition				-> Expression CondOp Expression
 CondOp					-> < | > | = | <>
 BoolList				-> && | "||"
-IfElseStmt			-> IfBlock CondStmt then Statements ElseBlock end
+IfElseStmt			-> if CondStmt then Statements ElseBlock end
 ElseBlock				-> ElIfBlock ElseBlock | else Statments | e
 ElIfBlock				-> elseif CondStmt then Statements
 MainFunc				-> Datatype main () FuncBody

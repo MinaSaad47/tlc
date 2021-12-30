@@ -296,6 +296,46 @@ namespace TLC
 
 		// Implement your logic here
 
+		Node ElseBlock()
+		{
+			Node node = new Node("ElseBlock");
+			switch (TokenStream[InputPointer].token_type)
+			{
+			case TK.ElseIf:
+				node.Children.Add(ElIfBlock());
+				node.Children.Add(ElseBlock());
+				break;
+			case TK.Else:
+				node.Children.Add(match(TK.Else));
+				node.Children.Add(Statements());
+			default:
+				return null;
+				break;
+			}
+			return node;
+		}
+
+		Node ElIfBlock()
+		{
+			Node node = new Node("ElIfBlock");
+			node.Children.Add(match(TK.ElseIf))
+			node.Children.Add(CondStmt());
+			node.Children.Add(match(TK.Then))
+			node.Children.Add(Statements());
+			return node;
+		}
+
+		Node MainFunc()
+		{
+			Node node = new Node("MainFunc");
+			node.Children.Add(DataType());
+			node.Children.Add(match(TK.Main));
+			node.Children.Add(match(TK.L_Paren));
+			node.Children.Add(match(TK.R_Paren));
+			node.Children.Add(FuncBody());
+			return node;
+		}
+
 		public Node match(TK ExpectedToken)
 		{
 
