@@ -191,6 +191,13 @@ namespace TLC
 			return node;
 		}
 
+		Node CommentStmt()
+		{
+			Node node = new Node("CommentStmt");
+			node.Children.Add(match(TK.Comment));
+			return node;
+		}
+
 		Node FuncCall()
 		{
 			Node node = new Node("FuncCall");
@@ -236,7 +243,7 @@ namespace TLC
 
 		Node AssignStmt()
 		{
-			Node node = new Node();
+			Node node = new Node("AssignStmt");
 			node.Children.Add(LValue());
 			node.Children.Add(match(TK.AssignOp));
 			node.Children.Add(RValue());
@@ -382,11 +389,11 @@ namespace TLC
 		Node Factor()
 		{
 			Node node = new Node("Factor");
-				if(TokenStream[InputPointer].token_type==TK.Constant)
+				if (TokenStream[InputPointer].token_type == TK.Constant)
 				{
 					node.Children.Add(match(TK.Constant));
 				}
-				else if (TokenStream[InputPointer].token_type==TK.Identifier)
+				else if (TokenStream[InputPointer].token_type == TK.Identifier)
 				{
 					node.Children.Add(match(TK.Identifier));
 				}
@@ -546,6 +553,7 @@ namespace TLC
 			case TK.Else:
 				node.Children.Add(match(TK.Else));
 				node.Children.Add(Statements());
+				break;
 			default:
 				return null;
 				break;
@@ -556,9 +564,9 @@ namespace TLC
 		Node ElIfBlock()
 		{
 			Node node = new Node("ElIfBlock");
-			node.Children.Add(match(TK.ElseIf))
+			node.Children.Add(match(TK.ElseIf));
 			node.Children.Add(CondStmt());
-			node.Children.Add(match(TK.Then))
+			node.Children.Add(match(TK.Then));
 			node.Children.Add(Statements());
 			return node;
 		}
