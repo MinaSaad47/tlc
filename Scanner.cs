@@ -14,7 +14,7 @@ namespace TLC
         public TK token_type;
 
         public Token(){}
-        
+
         public Token(string lexeme, TK tokenType)
         {
             lex = lexeme;
@@ -45,6 +45,7 @@ namespace TLC
             ReservedWords.Add("elseif", TK.ElseIf);
             ReservedWords.Add("then", TK.Then);
             ReservedWords.Add("end", TK.End);
+            ReservedWords.Add("main", TK.Main);
 
             Operators.Add(":", TK.Colon);
             Operators.Add(";", TK.SemiColon);
