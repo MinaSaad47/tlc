@@ -114,6 +114,7 @@ class MainClass
             {
                 TLC.Parser parser = new TLC.Parser();
                 parser.StartParsing(scanner.Tokens);
+parser_exit:
                 TreeNode tree = TLC.Parser.PrintParseTree(parser.root);
 
                 treeSyntax.AddObject(tree);

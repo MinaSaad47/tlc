@@ -35,7 +35,9 @@ namespace TLC
 		Node Program()
 		{
 			Node program = new Node("Program");
-			program.Children.Add(FuncStmt());
+			if (CheckEndOfTokens(1, "Main Function")) return null;
+			if (TokenStream[InputPointer + 1].token_type != TK.Main)
+				program.Children.Add(FuncStmt());
 			program.Children.Add(MainFunc());
 			return program;
 		}
@@ -45,9 +47,33 @@ namespace TLC
 			Node node = new Node("FuncStmt");
 			node.Children.Add(FuncDecl());
 			node.Children.Add(FuncBody());
+			node.Children.Add(FuncStmtDash());
 
 			return node;
 		}
+
+		Node FuncStmtDash()
+        {
+			if (CheckEndOfTokens(0, "Data Type")) return null;
+			switch (TokenStream[InputPointer].token_type)
+            {
+				case TK.String:
+				case TK.Float:
+				case TK.Int:
+					if (CheckEndOfTokens(1, "Main Function")) return null;
+					if (TokenStream[InputPointer + 1].token_type == TK.Main)
+						return null;
+					else
+                    {
+						Node node = new Node("FuncStmtDash");
+                        node.Children.Add(FuncDecl());
+                        node.Children.Add(FuncBody());
+                        node.Children.Add(FuncStmtDash());
+						return node;
+                    }
+            }
+			return null;
+        }
 
 		Node FuncDecl()
 		{
@@ -63,6 +89,7 @@ namespace TLC
 		Node ParamList()
 		{
 			Node node = new Node("ParamList");
+			if (CheckEndOfTokens(0, "Comma")) return null;
 			if (TokenStream[InputPointer].token_type == TK.Coma)
 			{
 				node.Children.Add(ParamListDash());
@@ -77,9 +104,10 @@ namespace TLC
 
 		Node ParamListDash()
 		{
-			Node node = new Node("ParamListDash");
+			if (CheckEndOfTokens(0, "Comma")) return null;
 			if (TokenStream[InputPointer].token_type == TK.Coma)
 			{
+				Node node = new Node("ParamListDash");
 				node.Children.Add(match(TK.Coma));
 				node.Children.Add(Param());
 				node.Children.Add(ParamListDash());
@@ -122,7 +150,7 @@ namespace TLC
 
 		Node StatementsDash()
 		{
-			Node node = new Node("StatementsDash");
+			if (CheckEndOfTokens(0, "Statment")) return null;
 			switch (TokenStream[InputPointer].token_type)
 			{
 			case TK.Identifier:
@@ -135,27 +163,28 @@ namespace TLC
 			case TK.If:
 			case TK.Repeat:
 			case TK.Comment:
+				Node node = new Node("StatementsDash");
 				Logger.Log($"{TokenStream[InputPointer].token_type}(" +
 					$"{TokenStream[InputPointer].ln}): " +
 					$"{TokenStream[InputPointer].lex}");
 				node.Children.Add(Statement());
 				Logger.Log("Out");
 				node.Children.Add(StatementsDash());
-				break;
-			default:
-				return null;
+				return node;
 			}
 
-			return node;
+			return null;
 		}
 
 		Node Statement()
 		{
 			Node node = new Node("Statement");
 
+			if (CheckEndOfTokens(0, "Statment")) return null;
 			switch (TokenStream[InputPointer].token_type)
 			{
 			case TK.Identifier:
+				if (CheckEndOfTokens(1, "Statment")) return null;
 				if (TokenStream[InputPointer + 1].token_type == TK.L_Paren)
 				{
 					node.Children.Add(FuncCallStmt());
@@ -222,6 +251,7 @@ namespace TLC
 		Node ArgList()
 		{
 			Node node = new Node("ArgList");
+			if (CheckEndOfTokens(0, "Identifier")) return null;
 			if (TokenStream[InputPointer].token_type == TK.Identifier)
 			{
 				node.Children.Add(Arg());
@@ -232,9 +262,10 @@ namespace TLC
 
 		Node ArgListDash()
 		{
-			Node node = new Node("ArgListDash");
+			if (CheckEndOfTokens(0, "Comma")) return null;
 			if (TokenStream[InputPointer].token_type == TK.Coma)
 			{
+				Node node = new Node("ArgListDash");
 				node.Children.Add(match(TK.Coma));
 				node.Children.Add(Arg());
 				node.Children.Add(ArgListDash());
@@ -271,21 +302,16 @@ namespace TLC
 		Node DataType()
 		{
 			Node node = new Node("DataType");
+			if (CheckEndOfTokens(0, "DataType")) return null;
 			switch (TokenStream[InputPointer].token_type)
 			{
 			case TK.Int:
-				node.Children.Add(match(TK.Int));
-				break;
 			case TK.Float:
-				node.Children.Add(match(TK.Float));
-				break;
 			case TK.String:
-				node.Children.Add(match(TK.String));
-				break;
-			default:
-				return null;
+				node.Children.Add(match(TokenStream[InputPointer].token_type));
+				return node;
 			}
-			return node;
+			return null;
 		}
 
 
@@ -316,6 +342,7 @@ namespace TLC
 		Node RValue()
 		{
 			Node node = new Node("RValue");
+			if (CheckEndOfTokens(0, "RValue")) return null;
 			if(TokenStream[InputPointer].token_type==TK.String)
 			{
 				node.Children.Add(match(TK.String));
@@ -335,22 +362,22 @@ namespace TLC
 		}
 		Node ExpressionDash()
 		{
-			Node node = new Node("ExpressionDash");
+			if (CheckEndOfTokens(0, "AddOp or MinusOp")) return null;
 			if(TokenStream[InputPointer].token_type==TK.PlusOp || TokenStream[InputPointer].token_type==TK.MinusOp)
 			{
+				Node node = new Node("ExpressionDash");
 				node.Children.Add(AddOp());
 				node.Children.Add(Term());
 				node.Children.Add(ExpressionDash());
+				return node ;
 			}
-			else
-			{
-				return null ;
-			}
-			return node ;
+
+			return null;
 		}
 		Node AddOp()
 		{
 			Node node = new Node("AddOp");
+			if (CheckEndOfTokens(0, "AddOp or MinusOp")) return null;
 			if(TokenStream[InputPointer].token_type==TK.PlusOp)
 			{
 				node.Children.Add(match(TK.PlusOp));
@@ -370,22 +397,21 @@ namespace TLC
 		}
 		Node TermDash()
 		{
-			Node node = new Node("TermDash");
+			if (CheckEndOfTokens(0, "MultiOp or DivisionOp")) return null;
 			if(TokenStream[InputPointer].token_type==TK.MultiOp || TokenStream[InputPointer].token_type==TK.DivideOp)
 			{
+				Node node = new Node("TermDash");
 				node.Children.Add(MulOp());
 				node.Children.Add(Factor());
 				node.Children.Add(TermDash());
+				return node ;
 			}
-			else
-			{
-				return null ;
-			}
-			return node ;
+			return null ;
 		}
 		Node MulOp()
 		{
 			Node node = new Node("MulOp");
+			if (CheckEndOfTokens(0, "MultiOp or DivisionOp")) return null;
 			if(TokenStream[InputPointer].token_type==TK.MultiOp)
 			{
 				node.Children.Add(match(TK.MultiOp));
@@ -399,20 +425,22 @@ namespace TLC
 		Node Factor()
 		{
 			Node node = new Node("Factor");
-				if (TokenStream[InputPointer].token_type == TK.Constant)
-				{
-					node.Children.Add(match(TK.Constant));
-				}
-				else if (TokenStream[InputPointer].token_type == TK.Identifier
-						&& TokenStream[InputPointer + 1].token_type != TK.L_Paren)
-				{
-					node.Children.Add(match(TK.Identifier));
-				}
-				else
-				{
-					node.Children.Add(FuncCall());
-				}
-				return node ;
+			if (CheckEndOfTokens(0, "Constant , Identifier or Function Call")) return null;
+			if (CheckEndOfTokens(1, "Left Param or Identifier")) return null;
+            if (TokenStream[InputPointer].token_type == TK.Constant)
+            {
+                node.Children.Add(match(TK.Constant));
+            }
+            else if (TokenStream[InputPointer].token_type == TK.Identifier
+                    && TokenStream[InputPointer + 1].token_type != TK.L_Paren)
+            {
+                node.Children.Add(match(TK.Identifier));
+            }
+            else
+            {
+                node.Children.Add(FuncCall());
+            }
+            return node ;
 		}
 		Node DeclStmt()
 		{
@@ -426,28 +454,56 @@ namespace TLC
 		{
 			Node node = new Node("IdentList");
 			node.Children.Add(match(TK.Identifier));
-			node.Children.Add(IdentListDash());
-			return node ;
+			node.Children.Add(IdentListLF1Dash());
+			return node;
 		}
+
+		Node IdentListLF1Dash()
+        {
+			Node node = new Node("IdentListLF1Dash");
+			if (CheckEndOfTokens(0, "Constant , Identifier or Function Call")) return null;
+			if (TokenStream[InputPointer].token_type == TK.AssignOp)
+            {
+				node.Children.Add(match(TK.AssignOp));
+				node.Children.Add(RValue());
+            }
+			node.Children.Add(IdentListDash());
+			return node;
+        }
 		Node IdentListDash()
 		{
-			Node node = new Node("IdentListDash");
+			if (CheckEndOfTokens(0, "Comma")) return null;
 			if(TokenStream[InputPointer].token_type == TK.Coma)
 			{
-				node.Children.Add(match(TK.Coma));
-				node.Children.Add(match(TK.Identifier));
-				node.Children.Add(IdentListDash());
+				Node node = new Node("IdentListDash");
+                node.Children.Add(match(TK.Coma));
+                node.Children.Add(match(TK.Identifier));
+				node.Children.Add(IdentListLF2Dash());
+				return node ;
 			}
-			else
-			{
-				return null;
-			}
-			return node ;
+			return null;
 		}
+
+		Node IdentListLF2Dash()
+        {
+			Node node = new Node("IdentListLF2Dash");
+			if (CheckEndOfTokens(0, "RValue or Comma")) return null;
+			switch (TokenStream[InputPointer].token_type)
+            {
+            case TK.String:
+            case TK.Constant:
+            case TK.Identifier:
+					node.Children.Add(RValue());
+					break;
+            }
+			node.Children.Add(IdentListDash());
+			return node;
+        }
 		Node WriteStmt()
 		{
 			Node node = new Node("WriteStmt");
 			node.Children.Add(match(TK.Write));
+			if (CheckEndOfTokens(0, "RValue or Endl")) return null;
 			if (TokenStream[InputPointer].token_type == TK.Endl)
 				node.Children.Add(match(TK.Endl));
 			else
@@ -489,18 +545,16 @@ namespace TLC
 		}
 		Node CondStmtDash()
 		{
-			Node node = new Node("CondStmtDash");
+			if (CheckEndOfTokens(0, "ConditionOp")) return null;
 			if(TokenStream[InputPointer].token_type==TK.AndOp || TokenStream[InputPointer].token_type==TK.OrOp )
 			{
+				Node node = new Node("CondStmtDash");
 				node.Children.Add(BoolList());
 				node.Children.Add(Condition());
 				node.Children.Add(CondStmtDash());
+				return node;
 			}
-			else
-			{
-				return null ;
-			}
-			return node;
+				return null;
 		}
 		Node Condition()
 		{
@@ -513,6 +567,7 @@ namespace TLC
 		Node CondOp()
 		{
 			Node node = new Node("CondOp");
+			if (CheckEndOfTokens(0, "ConditionOp")) return null;
 			switch(TokenStream[InputPointer].token_type)
 			{
 				case TK.LessThanOp :
@@ -533,6 +588,7 @@ namespace TLC
 		Node BoolList()
 		{
 			Node node = new Node("BoolList");
+			if (CheckEndOfTokens(0, "\'And\' or \'Or\'")) return null;
 			if(TokenStream[InputPointer].token_type==TK.AndOp)
 			{
 				node.Children.Add(match(TK.AndOp));
@@ -558,6 +614,7 @@ namespace TLC
 		Node ElseBlock()
 		{
 			Node node = new Node("ElseBlock");
+			if (CheckEndOfTokens(0, "Else If, Else, or End")) return null;
 			switch (TokenStream[InputPointer].token_type)
 			{
 			case TK.ElseIf:
@@ -588,7 +645,7 @@ namespace TLC
 		Node MainFunc()
 		{
 			Node node = new Node("MainFunc");
-			node.Children.Add(DataType());
+			node.Children.Add(match(TK.Int));
 			node.Children.Add(match(TK.Main));
 			node.Children.Add(match(TK.L_Paren));
 			node.Children.Add(match(TK.R_Paren));
@@ -601,6 +658,7 @@ namespace TLC
 
 			if (InputPointer < TokenStream.Count)
 			{
+				if (CheckEndOfTokens(0, "Else If, Else, or End")) return null;
 				if (ExpectedToken == TokenStream[InputPointer].token_type)
 				{
 					Node newNode = new Node($"{ExpectedToken.ToString()} \"{TokenStream[InputPointer].lex}\"");
@@ -653,5 +711,19 @@ namespace TLC
 			}
 			return tree;
 		}
+
+		private bool CheckEndOfTokens(int relativeIndex, string expectedToken)
+        {
+			if (InputPointer + relativeIndex < TokenStream.Count)
+            {
+				return false;
+            }
+			else
+            {
+				Errors.Error_List.Add($"Parsing Error({TokenStream[InputPointer - 1].ln})[EOF]: Expected {expectedToken}\r\n");
+				return true;
+            }
+        }
+
 	}
 }
