@@ -2,3 +2,4 @@ tests/
 obj/
 bin/
 .vs/
+release/

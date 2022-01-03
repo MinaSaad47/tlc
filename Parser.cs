@@ -10,7 +10,7 @@ namespace TLC
 	public class Node
 	{
 		public List<Node> Children = new List<Node>();
-		
+
 		public string Name;
 		public Node(string N)
 		{
@@ -22,7 +22,7 @@ namespace TLC
 		int InputPointer = 0;
 		List<Token> TokenStream;
 		public  Node root;
-		
+
 		public Node StartParsing(List<Token> TokenStream)
 		{
 			this.InputPointer = 0;
@@ -36,7 +36,7 @@ namespace TLC
 		{
 			Node program = new Node("Program");
 			program.Children.Add(FuncStmt());
-			// program.Children.Add(MainFunc());
+			program.Children.Add(MainFunc());
 			return program;
 		}
 
@@ -280,7 +280,7 @@ namespace TLC
 
 
 
-		// 
+		//
 		// Node Header()
 		// {
 		// 	Node header = new Node("Header");
@@ -290,7 +290,7 @@ namespace TLC
 		// Node DeclSec()
 		// {
 		// 	Node declsec = new Node("DeclSec");
-		// 	// write your code here to check atleast the declare sturcure 
+		// 	// write your code here to check atleast the declare sturcure
 		// 	// without adding procedures
 		// 	return declsec;
 		// }
@@ -598,7 +598,7 @@ namespace TLC
 
 				else
 				{
-					Errors.Error_List.Add("Parsing Error: Expected "
+					Errors.Error_List.Add($"Parsing Error({TokenStream[InputPointer].ln}): Expected "
 						+ ExpectedToken.ToString() + " and " +
 						TokenStream[InputPointer].token_type.ToString() +
 						"  found\r\n");
@@ -608,7 +608,7 @@ namespace TLC
 			}
 			else
 			{
-				Errors.Error_List.Add("Parsing Error: Expected "
+				Errors.Error_List.Add($"Parsing Error({TokenStream[InputPointer].ln}): Expected "
 						+ ExpectedToken.ToString()  + "\r\n");
 				InputPointer++;
 				return null;

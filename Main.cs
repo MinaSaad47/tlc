@@ -24,7 +24,7 @@ class MainClass
 
 		var menu = new MenuBar (new MenuBarItem [] {
 			new MenuBarItem ("_File", new MenuItem [] {
-				new MenuItem ("_Quit", "", () => { 
+				new MenuItem ("_Quit", "", () => {
 					top.Running = false;
 					Application.Shutdown();
 				}, null, null, Key.Q | Key.CtrlMask)
@@ -112,13 +112,18 @@ class MainClass
 			TLC.Parser parser = new TLC.Parser();
 			parser.StartParsing(scanner.Tokens);
 			TreeNode tree = TLC.Parser.PrintParseTree(parser.root);
-			
+
 			treeSyntax.AddObject(tree);
 			tablevTokens.Table = dt;
 			if (!winErr.Text.IsEmpty) {
 				winErr.Clear();
 			}
-			winErr.Text = scanner.Error;
+			string error = string.Empty;
+			foreach(string err in TLC.Errors.Error_List)
+			{
+				error += err;
+			}
+			winErr.Text = error;
 		};
 
 		winSrc.Add(tvSrc, btnCompile);

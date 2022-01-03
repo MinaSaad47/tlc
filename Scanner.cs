@@ -12,6 +12,7 @@ namespace TLC
     {
         public string lex;
         public TK token_type;
+	public int ln;
 
         public Token(){}
 
@@ -27,7 +28,7 @@ namespace TLC
         private List<Token> _tokens = new List<Token>();
         Dictionary<string, TK> ReservedWords = new Dictionary<string, TK>();
         Dictionary<string, TK> Operators = new Dictionary<string, TK>();
-        private string _error = String.Empty;
+	int curLN = 0;
 
         public Scanner()
         {
@@ -99,7 +100,7 @@ namespace TLC
                     // (3) Call FindTokenClass on the CurrentLexeme.
 
                     // (4) Update the outer loop pointer (i) to point on the next lexeme.
-                    
+
                 }
                 else if (char.IsDigit(CurrentChar))
                 {
@@ -122,6 +123,8 @@ namespace TLC
             {
                 char ch = src[i];
 
+		if (ch == '\n')
+			curLN++;
 
                 if (Char.IsLetterOrDigit(ch) || ch == '.')
                 {
@@ -143,7 +146,7 @@ namespace TLC
                         int j;
                         for (j = i; j < src.Length - 1; j++)
                         {
-                            lexeme += src[j]; 
+                            lexeme += src[j];
 
                             if (src[j] == '*' && src[j + 1] == '/')
                             {
@@ -171,7 +174,7 @@ namespace TLC
                         lexeme = String.Empty;
                         i = j + 1;
                     }
-                    else 
+                    else
                     {
                         Token opToken = new Token();
                         if ((src[i] == ':' && src[i + 1] == '=') ||
@@ -189,18 +192,18 @@ namespace TLC
                             opToken.token_type = Operators[Char.ToString(ch)];
 
                         }
-                        else 
+                        else
                         {
-                            _error += $"Invalid Lexeme:\n{ch}\n\n";
+                	    Errors.Error_List.Add($"Scanning Error({curLN}): Invalid Lexeme {ch}\r\n");
                             continue;
                         }
-
+			opToken.ln = curLN;
                         _tokens.Add(opToken);
                     }
-                
+
                 }
             }
-            
+
             if (!String.IsNullOrEmpty(lexeme))
                 FindTokenClass(lexeme);
         }
@@ -210,6 +213,7 @@ namespace TLC
             TK token_type;
             Token token = new Token();
             token.lex = lex;
+	    token.ln = curLN;
             //Is it a reserved word?
             if (ReservedWords.ContainsKey(lex))
             {
@@ -238,7 +242,7 @@ namespace TLC
             }
             else
             {
-                _error += $"Invalid Lexeme:\n{lex}\n\n";
+                Errors.Error_List.Add($"Scanning Error({curLN}): Invalid Lexeme {lex}\r\n");
             }
             //Is it an identifier?
 
@@ -248,20 +252,20 @@ namespace TLC
 
             //Is it an undefined?
 
-            
+
         }
 
         bool isIdentifier(string lex)
         {
             // Check if the lex is an identifier or not.
-            Regex re = new Regex($"^{RE.Identifier}$", RegexOptions.Compiled);  
+            Regex re = new Regex($"^{RE.Identifier}$", RegexOptions.Compiled);
 
             return re.IsMatch(lex);
         }
         bool isConstant(string lex)
         {
             // Check if the lex is a constant (Number) or not.
-            Regex re = new Regex($"^{RE.Number}$", RegexOptions.Compiled);  
+            Regex re = new Regex($"^{RE.Number}$", RegexOptions.Compiled);
 
             return re.IsMatch(lex);
         }
@@ -283,7 +287,6 @@ namespace TLC
         }
 
         public List<Token> Tokens { get => _tokens; }
-        public String Error { get => _error; }
 
     }
 }
