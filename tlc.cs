@@ -22,4 +22,14 @@ namespace TLC
 		public static List<string> Error_List = new List<string>();
 	}
 
+    public static class Logger
+    {
+        static StreamWriter sw = new StreamWriter(@"c:/Users/winPC/Desktop/log.txt");
+        public static void Log(string str)
+        {
+            sw.WriteLine(str);
+            sw.Flush();
+        }
+    }
+
 }

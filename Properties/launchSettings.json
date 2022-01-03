@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "tlc": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\winPC\\Documents\\Programming\\University\\tlc\\tests\\example1.tiny"
+    }
+  }
+}

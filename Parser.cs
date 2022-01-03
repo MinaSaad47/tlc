@@ -136,7 +136,9 @@ namespace TLC
 			case TK.If:
 			case TK.Repeat:
 			case TK.Comment:
+				Logger.Log($"{TokenStream[InputPointer].token_type}");
 				node.Children.Add(Statement());
+				Logger.Log("Out");
 				node.Children.Add(StatementsDash());
 				break;
 			default:
@@ -157,7 +159,7 @@ namespace TLC
 				{
 					node.Children.Add(FuncCall());
 				}
-				else
+				else if (TokenStream[InputPointer + 1].token_type == TK.AssignOp)
 				{
 					node.Children.Add(AssignStmt());
 				}
@@ -589,8 +591,8 @@ namespace TLC
 			{
 				if (ExpectedToken == TokenStream[InputPointer].token_type)
 				{
+					Node newNode = new Node($"{ExpectedToken.ToString()} \"{TokenStream[InputPointer].lex}\"");
 					InputPointer++;
-					Node newNode = new Node(ExpectedToken.ToString());
 
 					return newNode;
 
@@ -601,6 +603,7 @@ namespace TLC
 					Errors.Error_List.Add($"Parsing Error({TokenStream[InputPointer].ln}): Expected "
 						+ ExpectedToken.ToString() + " and " +
 						TokenStream[InputPointer].token_type.ToString() +
+						$" \"{TokenStream[InputPointer].lex}\"" +
 						"  found\r\n");
 					InputPointer++;
 					return null;

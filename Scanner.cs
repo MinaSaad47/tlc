@@ -37,7 +37,7 @@ namespace TLC
             ReservedWords.Add("string", TK.String);
             ReservedWords.Add("repeat", TK.Repeat);
             ReservedWords.Add("until", TK.Untill);
-            ReservedWords.Add("return ", TK.Return);
+            ReservedWords.Add("return", TK.Return);
             ReservedWords.Add("write", TK.Write);
             ReservedWords.Add("read", TK.Read);
             ReservedWords.Add("endl", TK.Endl);
