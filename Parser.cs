@@ -108,7 +108,6 @@ namespace TLC
 			Node node = new Node("FuncBody");
 			node.Children.Add(match(TK.L_Brace));
 			node.Children.Add(Statements());
-			node.Children.Add(RetStmt());
 			node.Children.Add(match(TK.R_Brace));
 			return node;
 		}
@@ -136,7 +135,9 @@ namespace TLC
 			case TK.If:
 			case TK.Repeat:
 			case TK.Comment:
-				Logger.Log($"{TokenStream[InputPointer].token_type}");
+				Logger.Log($"{TokenStream[InputPointer].token_type}(" +
+					$"{TokenStream[InputPointer].ln}): " +
+					$"{TokenStream[InputPointer].lex}");
 				node.Children.Add(Statement());
 				Logger.Log("Out");
 				node.Children.Add(StatementsDash());
@@ -157,7 +158,7 @@ namespace TLC
 			case TK.Identifier:
 				if (TokenStream[InputPointer + 1].token_type == TK.L_Paren)
 				{
-					node.Children.Add(FuncCall());
+					node.Children.Add(FuncCallStmt());
 				}
 				else if (TokenStream[InputPointer + 1].token_type == TK.AssignOp)
 				{
@@ -200,6 +201,14 @@ namespace TLC
 			return node;
 		}
 
+		Node FuncCallStmt()
+        {
+			Node node = new Node("FuncCallStmt");
+			node.Children.Add(FuncCall());
+			node.Children.Add(match(TK.SemiColon));
+			return node;
+        }
+
 		Node FuncCall()
 		{
 			Node node = new Node("FuncCall");
@@ -207,7 +216,6 @@ namespace TLC
 			node.Children.Add(match(TK.L_Paren));
 			node.Children.Add(ArgList());
 			node.Children.Add(match(TK.R_Paren));
-			node.Children.Add(match(TK.SemiColon));
 			return node;
 		}
 
@@ -395,7 +403,8 @@ namespace TLC
 				{
 					node.Children.Add(match(TK.Constant));
 				}
-				else if (TokenStream[InputPointer].token_type == TK.Identifier)
+				else if (TokenStream[InputPointer].token_type == TK.Identifier
+						&& TokenStream[InputPointer + 1].token_type != TK.L_Paren)
 				{
 					node.Children.Add(match(TK.Identifier));
 				}
@@ -439,7 +448,10 @@ namespace TLC
 		{
 			Node node = new Node("WriteStmt");
 			node.Children.Add(match(TK.Write));
-			node.Children.Add(RValue());
+			if (TokenStream[InputPointer].token_type == TK.Endl)
+				node.Children.Add(match(TK.Endl));
+			else
+				node.Children.Add(RValue());
 			node.Children.Add(match(TK.SemiColon));
 			return node ;
 		}

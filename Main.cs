@@ -95,6 +95,7 @@ class MainClass
 		};
 
 		btnCompile.Clicked += () => {
+			TLC.Errors.Error_List.Clear();
 			string src = tvSrc.Text.ToString();
 			TLC.Scanner scanner = new TLC.Scanner();
 			scanner.StartScanning(src);
@@ -109,11 +110,14 @@ class MainClass
 				dt.Rows.Add(token.lex, token.token_type.ToString());
 			}
 
-			TLC.Parser parser = new TLC.Parser();
-			parser.StartParsing(scanner.Tokens);
-			TreeNode tree = TLC.Parser.PrintParseTree(parser.root);
+			if (TLC.Errors.Error_List.Count == 0)
+            {
+                TLC.Parser parser = new TLC.Parser();
+                parser.StartParsing(scanner.Tokens);
+                TreeNode tree = TLC.Parser.PrintParseTree(parser.root);
 
-			treeSyntax.AddObject(tree);
+                treeSyntax.AddObject(tree);
+            }
 			tablevTokens.Table = dt;
 			if (!winErr.Text.IsEmpty) {
 				winErr.Clear();

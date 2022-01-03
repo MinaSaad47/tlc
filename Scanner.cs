@@ -28,7 +28,7 @@ namespace TLC
         private List<Token> _tokens = new List<Token>();
         Dictionary<string, TK> ReservedWords = new Dictionary<string, TK>();
         Dictionary<string, TK> Operators = new Dictionary<string, TK>();
-	int curLN = 0;
+	int curLN = 1;
 
         public Scanner()
         {
