@@ -164,11 +164,7 @@ namespace TLC
 			case TK.Repeat:
 			case TK.Comment:
 				Node node = new Node("StatementsDash");
-				Logger.Log($"{TokenStream[InputPointer].token_type}(" +
-					$"{TokenStream[InputPointer].ln}): " +
-					$"{TokenStream[InputPointer].lex}");
 				node.Children.Add(Statement());
-				Logger.Log("Out");
 				node.Children.Add(StatementsDash());
 				return node;
 			}
